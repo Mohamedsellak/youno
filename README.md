@@ -4,8 +4,7 @@
 
 ## 🌐 Live Demo
 
-**Deployed on Vercel:** [https://youno.vercel.app](https://youno.netlify.app) *(update after deployment)*
-
+**Deployed on Vercel:** [https://youno.vercel.app](https://youno.netlify.app)
 ---
 
 ## ✨ What It Does
