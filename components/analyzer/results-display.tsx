@@ -286,7 +286,7 @@ export function ResultsDisplay({ result }: { result: AnalysisResult }) {
 
       {/* Debug Accordion */}
       {result.debug && (
-        <Accordion type="single" collapsible="true" className="w-full">
+        <Accordion className="w-full">
           <AccordionItem
             value="debug"
             className="border border-border/30 rounded-xl bg-card/40 backdrop-blur-xl px-4 shadow-lg hover:border-border/50 hover:bg-card/50 transition-all duration-300"
