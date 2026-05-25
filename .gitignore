@@ -31,7 +31,10 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env.local
+.env.*.local
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +42,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# presentation, LaTeX & internal docs (not for the company repo)
+*.tex
+*.pdf
+*.log
+*.aux
+*.nav
+*.out
+*.toc
+*.snm
+*.vrb
+speaker_notes.md
+LIVE_SESSION_EXPLANATION.md
