@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
   const finalTechStack = [...techStack];
   const techNames = new Set(techStack.map((t) => t.name.toLowerCase()));
   for (const t of llmResult?.techStackAdditions || []) {
-    if (!techNames.has(t.name.toLowerCase())) {
+    if (t.name && !techNames.has(t.name.toLowerCase())) {
       finalTechStack.push(t);
     }
   }
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
   const finalGtmSignals = [...gtmSignals];
   const signalNames = new Set(gtmSignals.map((s) => s.name.toLowerCase()));
   for (const s of llmResult?.gtmSignalsAdditions || []) {
-    if (!signalNames.has(s.name.toLowerCase())) {
+    if (s.name && !signalNames.has(s.name.toLowerCase())) {
       finalGtmSignals.push(s);
     }
   }

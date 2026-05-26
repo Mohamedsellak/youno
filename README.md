@@ -7,8 +7,9 @@
 ## 🌐 Démo en Ligne
 
 L'application est déployée et accessible publiquement :
-*   **Lien de production :** [https://youno.vercel.app](https://youno.vercel.app) *(ou sur le service de déploiement configuré)*
-*   **Code Source :** [https://github.com/Mohamedsellak/youno](https://github.com/Mohamedsellak/youno)
+
+* **Lien de production :** [https://youno.vercel.app](https://youno.vercel.app) *(ou sur le service de déploiement configuré)*
+* **Code Source :** [https://github.com/Mohamedsellak/youno](https://github.com/Mohamedsellak/youno)
 
 ---
 
@@ -48,6 +49,7 @@ graph TD
 ```
 
 ### 1. Orchestration du Pipeline (`app/api/analyze/route.ts`)
+
 * **Exécution Concurrente :** Nous utilisons `Promise.all` pour appeler simultanément l'API de Hunter.io et le modèle LLM d'OpenRouter, minimisant ainsi le temps d'attente total à la latence de la requête la plus lente.
 * **Dégradation Gracieuse (Graceful Degradation) :** L'application ne plante jamais si un service externe échoue. Si la limite mensuelle de Hunter est atteinte ou si les APIs LLM subissent une surcharge générale, le pipeline intercepte l'erreur, bascule sur une confiance basse et retourne les données brutes extraites du site (tech stack, signaux GTM locaux), garantissant un service fonctionnel 100 % du temps.
 
@@ -71,32 +73,38 @@ Notre architecture privilégie l'efficacité, la rapidité d'exécution et le mi
 ## 🚀 Lancement en Local
 
 ### Prérequis
+
 * Node.js version 18 ou supérieure
 * Un gestionnaire de paquets (npm, yarn ou pnpm)
 
 ### Étapes d'Installation
 
 1. **Cloner le dépôt GitHub :**
+
    ```bash
    git clone https://github.com/Mohamedsellak/youno.git
    cd youno
    ```
 
 2. **Installer les dépendances :**
+
    ```bash
    npm install
    ```
 
 3. **Configurer les variables d'environnement :**
    Dupliquez le fichier d'exemple et renseignez vos clés de services :
+
    ```bash
    cp .env.example .env
    ```
+
    Éditez ensuite le fichier `.env` :
    * `OPENROUTER_API_KEY` : Votre clé API [OpenRouter](https://openrouter.ai/keys) *(Obligatoire pour l'IA)*
    * `HUNTER_API_KEY` : Votre clé API [Hunter.io](https://hunter.io/api-keys) *(Optionnel, l'app fonctionne sans)*
 
 4. **Lancer le serveur de développement :**
+
    ```bash
    npm run dev
    ```
@@ -124,50 +132,41 @@ Le scoring évalue si l'entreprise détectée représente une cible commerciale 
 > [!NOTE]
 > Le score de fit commence à une **base neutre de 5 / 10** et applique les règles suivantes :
 
-*   **Indicateurs SaaS Forts :**
-    *   **Page de tarifs / plans (+2) :** Présence d'un lien contenant `/pricing` ou `/plans` (indique un modèle de souscription récurrent).
-    *   **CTA de démo ou contact (+2) :** Liens de type `/demo`, `/book-demo` ou `/contact-sales` (indique une démarche Go-To-Market structurée).
-*   **Signaux d'Activité / Marketing :**
-    *   **Page Recrutement (+1) :** Liens `/careers` ou `/jobs` (croissance d'effectifs).
-    *   **Blog actif (+1) :** Liens `/blog` ou `/articles` (stratégie d'inbound marketing).
-    *   **Outils B2B Détectés (+1) :** Utilisation active d'outils analytiques/marketing d'entreprise (Segment, HubSpot ou Intercom).
-*   **Pénalités de Hors-Cible :**
-    *   **Détection E-commerce (-2) :** Utilisation de Shopify (indique une boutique en ligne B2C/B2B et non un éditeur de logiciel).
-    *   **CMS Traditionnel (-1) :** Utilisation de WordPress (indique souvent un site vitrine classique de PME locale).
+* **Indicateurs SaaS Forts :**
+  * **Page de tarifs / plans (+2) :** Présence d'un lien contenant `/pricing` ou `/plans` (indique un modèle de souscription récurrent).
+  * **CTA de démo ou contact (+2) :** Liens de type `/demo`, `/book-demo` ou `/contact-sales` (indique une démarche Go-To-Market structurée).
+* **Signaux d'Activité / Marketing :**
+  * **Page Recrutement (+1) :** Liens `/careers` ou `/jobs` (croissance d'effectifs).
+  * **Blog actif (+1) :** Liens `/blog` ou `/articles` (stratégie d'inbound marketing).
+  * **Outils B2B Détectés (+1) :** Utilisation active d'outils analytiques/marketing d'entreprise (Segment, HubSpot ou Intercom).
+* **Pénalités de Hors-Cible :**
+  * **Détection E-commerce (-2) :** Utilisation de Shopify (indique une boutique en ligne B2C/B2B et non un éditeur de logiciel).
+  * **CMS Traditionnel (-1) :** Utilisation de WordPress (indique souvent un site vitrine classique de PME locale).
 
 **Catégorisation finale :**
-*   `0 à 3` : **Low Fit** (Faible adéquation)
-*   `4 à 7` : **Medium Fit** (Adéquation moyenne)
-*   `8 à 10` : **High Fit** (Forte adéquation SaaS)
+
+* `0 à 3` : **Low Fit** (Faible adéquation)
+* `4 à 7` : **Medium Fit** (Adéquation moyenne)
+* `8 à 10` : **High Fit** (Forte adéquation SaaS)
 
 ---
 
-## ⚠️ Limites Actuelles & Améliorations Futures
+## ⚠️ Limites Actuelles & Solutions Futures
 
-Dans le cadre d'un déploiement en production industrielle au sein de **Konsole**, plusieurs améliorations architecturales sont recommandées :
+Pour passer à l'échelle en production avec **Konsole**, voici les limites identifiées et leurs solutions :
 
-1. **Persistance Distribuée (Redis) :**
-   * *Limite actuelle :* Les Maps de cache et de rate-limiting résident dans la mémoire vive de l'instance d'application. Sur une infrastructure serverless (Vercel) ou multi-instance (autoscaling), cet état est volatile et réinitialisé à chaque extinction d'instance.
-   * *Amélioration :* Remplacer le cache RAM par un magasin de données partagé comme **Redis (Upstash)** pour assurer la persistance globale et le partage d'état entre toutes les fonctions serverless.
-2. **Gestion des Applications Single-Page (SPA) :**
-   * *Limite actuelle :* Cheerio ne fait que parser le code HTML brut de la réponse serveur. Si le site cible est entièrement rendu côté client par du JavaScript lourd (React, Angular ou Vue sans SSR), le scraper n'obtiendra qu'un DOM vide.
-   * *Amélioration :* Mettre en place un système de repli automatique (fallback) vers un navigateur léger sans tête (comme **Playwright** ou **Puppeteer**) uniquement lorsque le HTML renvoyé par Cheerio ne contient aucun lien ou texte exploitable.
-3. **Scraping Multi-Pages (Deep Crawling) :**
-   * *Limite actuelle :* Nous n'analysons que la page d'accueil.
-   * *Amélioration :* Étendre le scraper pour explorer de manière asynchrone 2 ou 3 pages enfants clés (comme les pages `/about`, `/legal` ou `/pricing` si elles ne sont pas chargées dynamiquement) afin d'obtenir des données d'enrichissement bien plus précises.
-4. **Gestion des Captchas et Pare-feu (WAF) :**
-   * *Limite actuelle :* Certains hébergeurs bloquent les requêtes provenant d'adresses IP associées à des serveurs cloud (AWS, Vercel).
-   * *Amélioration :* Intégrer un service de proxy rotatif résidentiel ou un service d'évitement de pare-feu (ex: ScrapingBee, ZenRows).
+1. **Cache en RAM Volatile (Serveurs Multiples & Serverless)**  
+   * **Problème :** Le cache et rate limiter actuels (Map) sont isolés dans la RAM d'un seul serveur. Ils sont perdus à chaque redémarrage et inutiles derrière un Load Balancer.
+   * **Solution :** Migrer vers **Redis (ex: Upstash)** pour partager un état persistant et distribué entre tous les serveurs ou instances cloud.
 
----
+2. **Limites de l'IA (Rate Limits & Timeouts)**  
+   * **Problème :** Les modèles LLM gratuits sont sujets aux saturations et timeouts réseaux fréquents.
+   * **Solution :** Utiliser notre **système de Cascade LLM avec des timeouts courts (8s)**, et idéalement basculer le traitement lourd sur des **Files d'attente (Queues via BullMQ)**.
 
-## 🎥 Livrables & Vidéos Loom
+3. **Sites Protégés (Pare-feu & Captcha)**  
+   * **Problème :** Cloudflare et les WAF bloquent fréquemment les requêtes provenant d'IP de serveurs (Vercel, AWS).
+   * **Solution :** Intégrer des **Proxies rotatifs résidentiels** ou des services de scraping dédiés capables de résoudre silencieusement les captchas.
 
-Le rendu du cas pratique comprend les éléments suivants :
-
-1. **Vidéo Loom de Démo & Architecture (5-8 min) :**
-   * Présentation visuelle de l'interface en direct avec analyse de domaines SaaS et non-SaaS.
-   * Explication de la structure du code et du fonctionnement asynchrone du pipeline.
-   * Pitch sur l'intégration fonctionnelle de ce module dans la suite Konsole de Youno.
-2. **Vidéo Loom Bonus - Side Project (3-5 min) :**
-   * Présentation d'un projet personnel/professionnel connexe, de la stack technique choisie et des retours d'expérience associés.
+4. **Applications Single-Page (SPA sans SSR)**  
+   * **Problème :** Cheerio est aveugle aux sites entièrement rendus côté client (ex: pure React/Vue), car le HTML initial est vide.
+   * **Solution :** Déclencher un fallback automatique vers un **Navigateur Headless (Playwright)** lorsque l'extraction Cheerio initiale ne retourne pas de texte pertinent.
