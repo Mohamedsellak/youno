@@ -1,159 +1,173 @@
-# Youno — Website Intelligence Analyzer
+# 💼 Youno — Website Intelligence Analyzer (Konsole MVP)
 
-> Analyze any website to extract company info, tech stack, GTM signals, and B2B SaaS fit score — powered by AI enrichment.
-
-## 🌐 Live Demo
-
-**Deployed on Netlify:** [https://youno.vercel.app](https://youno.netlify.app)
----
-
-## ✨ What It Does
-
-Enter any website URL (e.g. `stripe.com`) and Youno will:
-
-1. **Scrape & parse** the homepage HTML to extract metadata, links, and signals
-2. **Detect the tech stack** via simple, fast string matching on HTML and headers
-3. **Identify GTM signals** — pricing pages, demo CTAs, careers, blog, social links, tracking tools
-4. **Enrich via Hunter.io** — discover company email patterns and contacts
-5. **Enrich via AI (OpenRouter)** — use an LLM for company classification, industry detection, and size estimation
-6. **Compute a B2B SaaS Fit Score** with transparent, rules-based reasoning
+> Un module d'enrichissement et d'intelligence Web conçu pour la plateforme SaaS **Konsole** de Youno. Ce service analyse n'importe quel site web pour en extraire l'identité de l'entreprise, sa tech stack, ses signaux Go-To-Market (GTM), des contacts qualifiés, et calcule un score de pertinence B2B SaaS.
 
 ---
 
-## 🏛 Live Session Explanation Sheet (Cheat Sheet)
+## 🌐 Démo en Ligne
 
-If you are asked to walk through the project in a live session, here is a simple and extremely clear explanation of what is going on:
-
-### 1. The Core Architecture (`app/api/analyze/route.ts`)
-*   **Orchestration Pipeline:** When a URL is submitted, the API route handles everything sequentially: rate-limit checks, cache lookups, HTML fetching, HTML parsing, API enrichment (Hunter + LLM in parallel), scoring, and caching.
-*   **Parallel Execution:** We use `Promise.all` to run Hunter.io and OpenRouter LLM requests in parallel to minimize response times.
-*   **Graceful Degradation:** The pipeline never breaks. If Hunter.io fails (limit reached) or the LLM is rate-limited, the system gracefully continues, returning deterministic metadata scraping and tech stack information.
-
-### 2. URL Normalization & SSRF Protection (`lib/url.ts`)
-*   **Normalization:** We clean the URL (e.g., adding `https://` if missing).
-*   **Security:** We block SSRF (Server-Side Request Forgery) by explicitly checking and blocking localhost (`127.0.0.1`, `[::1]`), internal metadata domains (`metadata.google.internal`), and private IP subnets (e.g., `192.168.x.x`, `10.x.x.x`).
-
-### 3. High Performance HTML Fetching (`lib/fetchHtml.ts`)
-*   **Constraints:** We enforce a `10s` timeout and a `10MB` size ceiling to protect the server from getting stuck on endless streams or memory-intensive heavy resources.
-
-### 4. Simple Tech Detection (`lib/detectTech.ts`)
-*   **Explainable Design:** Instead of complex regex libraries or heavy dependencies, we use clean, straightforward case-insensitive string matching (`lowerHtml.includes(...)`). This is extremely fast, highly maintainable, and perfect for live-explaining.
-
-### 5. Smart LLM Enrichment & Fallbacks (`lib/enrich.ts`)
-*   **Fallback Chain:** Free LLM endpoints can occasionally be rate-limited. We built an automated model fallback chain that attempts primary `google/gemma-4-31b-it:free`, then tries Llama, DeepSeek, and finally the `openrouter/free` meta-router.
-*   **Structured JSON Output:** We instruct the LLM to output pure JSON and use a robust regex parsing fallback in case markdown code blocks (` ```json `) are included in the response.
-
-### 6. Rule-Based SaaS Fit Score (`lib/score.ts`)
-*   **Transparent Rules:** The B2B SaaS fit engine assigns points deterministically (+2 for a pricing page link, +2 for demo CTA, +1 for Intercom/HubSpot marketing tools, -2 for Shopify e-commerce markers).
+L'application est déployée et accessible publiquement :
+*   **Lien de production :** [https://youno.vercel.app](https://youno.vercel.app) *(ou sur le service de déploiement configuré)*
+*   **Code Source :** [https://github.com/Mohamedsellak/youno](https://github.com/Mohamedsellak/youno)
 
 ---
 
-## 🏗 Tech Stack
+## ✨ Fonctionnalités Clés
 
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| **Framework** | Next.js 16 (App Router) | Server-side API routes, React Server Components, Vercel-ready |
-| **Language** | TypeScript | Type safety across the full stack |
-| **Styling** | Tailwind CSS v4 | Utility-first, dark mode, rapid UI development |
-| **Components** | shadcn/ui | Beautiful, accessible, composable UI primitives |
-| **Validation** | Zod | Schema validation for API inputs |
-| **Scraping** | Cheerio | Fast server-side HTML parsing (no headless browser needed) |
-| **LLM** | OpenRouter API | Access to free models (Google Gemma, Llama, DeepSeek) |
-| **Email Intel** | Hunter.io API | Domain email discovery |
-| **Deployment** | Vercel | Zero-config deployment for Next.js |
+1. **Scraping et Analyse Structurée (Cheerio) :** Extraction instantanée des métadonnées HTML (titre, description meta, tags OpenGraph), des structures de liens et du contenu textuel visible.
+2. **Détection Automatique de la Tech Stack :** Identification performante et légère des frameworks, CMS, outils d'analytique, CRMs et plateformes de paiement via des empreintes HTML et d'en-têtes HTTP.
+3. **Identification des Signaux GTM :** Détection d'intentions commerciales (page Tarifs, appel à l'action Démo/Contact, page Recrutement, présence d'un Blog, liens vers les réseaux sociaux professionnels, outils de tracking).
+4. **Enrichissement Email & Contacts (Hunter.io) :** Récupération de contacts professionnels clés et de schémas d'adresses email associés au domaine.
+5. **Enrichissement Sémantique par IA (Cascade OpenRouter) :** Qualification avancée de l'entreprise (nom, description synthétique, secteur d'activité, taille estimée de l'effectif) via des modèles d'IA gratuits, avec système de fallback résilient.
+6. **Scoring Prédictif B2B SaaS :** Algorithme transparent et déterministe évaluant l'adéquation commerciale de la cible avec un profil B2B SaaS.
 
 ---
 
-## 🚀 Getting Started
+## 🏛️ Architecture & Flux de Données
 
-### Prerequisites
+Lorsqu'un utilisateur soumet une URL (ex: `stripe.com`) dans l'interface, le flux d'exécution traverse les couches suivantes de manière séquentielle et optimisée :
 
-- Node.js 18+
-- npm
-
-### Local Development
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/youno.git
-cd youno
-
-# 2. Install dependencies
-npm install
-
-# 3. Set up environment variables
-cp .env.example .env
-
-# 4. Run the dev server
-npm run dev
-
-# 5. Open http://localhost:3000
+```mermaid
+graph TD
+    A[Saisie de l'URL dans l'UI] --> B(validate.ts : Validation Zod du format)
+    B --> C(rateLimit.ts : Contrôle du débit par IP)
+    C -->|Autorisé| D(url.ts : Normalisation HTTPS & Blocage SSRF)
+    C -->|Bloqué| C_Err[Retour HTTP 429 Rate Limit]
+    D -->|URL Valide| E(cache.ts : Vérification Cache TTL en RAM)
+    D -->|URL Suspecte/Interne| D_Err[Retour HTTP 422 Forbidden]
+    E -->|Hit Cache| E_Res[Retour Direct du Résultat Cachable]
+    E -->|Miss Cache| F(fetchHtml.ts : Requête HTTP résiliente avec Timeout et Max Size)
+    F -->|Succès HTTP| G(extractSignals.ts : Extraction des signaux & tags via Cheerio)
+    F -->|Échec/Timeout| F_Err[Retour HTTP 502/504 Error]
+    G --> H(detectTech.ts : Matching de chaînes sur le DOM & En-têtes)
+    H --> I(Exécution en Parallèle : hunter.ts + enrich.ts LLM)
+    I --> J(Fusion des résultats & surcharge sémantique de l'IA)
+    J --> K(scoreFit.ts : Calcul du score de Fit B2B SaaS)
+    K --> L(cache.ts : Enregistrement du résultat en Cache TTL)
+    L --> M[Affichage dynamique dans l'UI client]
 ```
 
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENROUTER_API_KEY` | Yes | API key from [OpenRouter](https://openrouter.ai/keys) |
-| `OPENROUTER_MODEL` | No | LLM model ID (default: `google/gemma-4-31b-it:free`) |
-| `HUNTER_API_KEY` | No | API key from [Hunter.io](https://hunter.io/api-keys) — app works without it |
-| `APP_RATE_LIMIT_MAX` | No | Max requests per window (default: 10) |
-| `APP_RATE_LIMIT_WINDOW_MS` | No | Rate limit window in ms (default: 600000 = 10min) |
+### 1. Orchestration du Pipeline (`app/api/analyze/route.ts`)
+* **Exécution Concurrente :** Nous utilisons `Promise.all` pour appeler simultanément l'API de Hunter.io et le modèle LLM d'OpenRouter, minimisant ainsi le temps d'attente total à la latence de la requête la plus lente.
+* **Dégradation Gracieuse (Graceful Degradation) :** L'application ne plante jamais si un service externe échoue. Si la limite mensuelle de Hunter est atteinte ou si les APIs LLM subissent une surcharge générale, le pipeline intercepte l'erreur, bascule sur une confiance basse et retourne les données brutes extraites du site (tech stack, signaux GTM locaux), garantissant un service fonctionnel 100 % du temps.
 
 ---
 
-## 📁 Project Structure
+## ⚙️ Choix Techniques & Justifications
 
-```
-youno/
-├── app/
-│   ├── api/analyze/route.ts    # POST /api/analyze — main pipeline
-│   ├── globals.css             # Tailwind + shadcn theme
-│   ├── layout.tsx              # Root layout (dark mode, SEO)
-│   └── page.tsx                # Home page (server component)
-├── components/
-│   ├── analyzer-client.tsx     # Interactive form + results (client component)
-│   └── ui/                    # shadcn/ui components
-├── lib/
-│   ├── types.ts               # TypeScript types & data models
-│   ├── validate.ts            # Zod input validation
-│   ├── url.ts                 # URL normalization + SSRF protection
-│   ├── fetchHtml.ts           # HTML fetcher (timeout, size limit)
-│   ├── extractSignals.ts      # Cheerio-based signal extraction
-│   ├── detectTech.ts          # Tech stack detection (simple string checks)
-│   ├── hunter.ts              # Hunter.io API client
-│   ├── enrich.ts              # OpenRouter LLM enrichment with fallbacks
-│   ├── score.ts               # B2B SaaS fit score calculator
-│   ├── rateLimit.ts           # In-memory rate limiter (IP tracking Map)
-│   ├── cache.ts               # In-memory TTL cache (Map + TTL)
-│   └── utils.ts               # shadcn utility (cn)
-├── .env.example
-├── README.md
-└── TODO.md
-```
+Notre architecture privilégie l'efficacité, la rapidité d'exécution et le minimalisme technologique :
+
+| Outil / Framework | Rôle & Composant | Justification & Avantages |
+| :--- | :--- | :--- |
+| **Next.js 16 (App Router)** | Framework Global | Idéal pour déployer des routes d'API Serverless performantes, bénéficier du rendu côté serveur, et s'intégrer nativement sur Vercel. |
+| **Cheerio** | Scraper DOM HTML | Extraction ultra-rapide en mémoire sans la lourdeur d'un navigateur sans tête (Headless Browser comme Puppeteer ou Playwright). Consommation de RAM minime et latence réseau optimisée. |
+| **OpenRouter API** | Enrichissement LLM | Permet de requêter des modèles open-source performants et gratuits (Gemma, Llama, DeepSeek) avec une seule clé d'API unifiée. |
+| **Hunter.io API** | Recherche de Contacts | Standard de l'industrie pour extraire des adresses emails professionnelles qualifiées et des profils associés à partir d'un domaine. |
+| **Tailwind CSS v4 & shadcn/ui** | Design & UI | Utilisation de jetons de design CSS natifs, animations fluides, mode sombre par défaut et mise en page responsive de type Dashboard Bento-Grid haut de gamme. |
+| **Zod** | Validation de Schéma | Sécurisation et typage des entrées de l'API à la frontière client-serveur. |
 
 ---
 
-## 🔒 Security
+## 🚀 Lancement en Local
 
-- **SSRF Protection**: Blocks localhost, private IPs (10/8, 192.168/16, 172.16/12), .local domains
-- **Rate Limiting**: In-memory sliding window (10 req / 10 min per IP)
-- **Size Limits**: 10MB max HTML response, 10s fetch timeout
-- **No Client Secrets**: All API keys are server-side only
-- **Input Validation**: Zod schema validation on all inputs
+### Prérequis
+* Node.js version 18 ou supérieure
+* Un gestionnaire de paquets (npm, yarn ou pnpm)
+
+### Étapes d'Installation
+
+1. **Cloner le dépôt GitHub :**
+   ```bash
+   git clone https://github.com/Mohamedsellak/youno.git
+   cd youno
+   ```
+
+2. **Installer les dépendances :**
+   ```bash
+   npm install
+   ```
+
+3. **Configurer les variables d'environnement :**
+   Dupliquez le fichier d'exemple et renseignez vos clés de services :
+   ```bash
+   cp .env.example .env
+   ```
+   Éditez ensuite le fichier `.env` :
+   * `OPENROUTER_API_KEY` : Votre clé API [OpenRouter](https://openrouter.ai/keys) *(Obligatoire pour l'IA)*
+   * `HUNTER_API_KEY` : Votre clé API [Hunter.io](https://hunter.io/api-keys) *(Optionnel, l'app fonctionne sans)*
+
+4. **Lancer le serveur de développement :**
+   ```bash
+   npm run dev
+   ```
+
+5. **Accéder à l'application :**
+   Ouvrez votre navigateur sur [http://localhost:3000](http://localhost:3000).
 
 ---
 
-## ⚠️ Current Limitations
+## 🔒 Sécurité & Résilience
 
-- **In-memory cache/rate-limit**: Resets on server restart. Not suitable for multi-instance deployments (use Redis in production).
-- **Single page scraping**: Only analyzes the homepage HTML. Sub-pages are not crawled.
-- **JavaScript-heavy sites**: Uses Cheerio (no JS execution). Sites that render entirely client-side may yield limited results.
-- **Free LLM models**: May have rate limits, slower responses, or lower quality vs. paid models.
-- **Hunter.io free plan**: Limited to 25 requests/month.
+Le scraper de Konsole intègre des mécanismes rigoureux pour se protéger contre les abus et les attaques d'infrastructure :
+
+* **Protection contre le SSRF (Server-Side Request Forgery) :** Notre module `lib/url.ts` normalise l'URL saisie et bloque impérativement les requêtes vers des hôtes locaux (`localhost`, `127.0.0.1`, `[::1]`), les sous-réseaux IP privés (ex: `192.168.x.x`, `10.x.x.x`), les métadonnées de cloud (`169.254.169.254`, `metadata.google.internal`), et les domaines d'infrastructure locale (`*.local`).
+* **Limitation des Requêtes HTTP (Timeout & Size Limits) :** Afin d'éviter qu'une URL malveillante ou un flux infini ne bloque le serveur, la requête d'extraction HTML (`lib/fetchHtml.ts`) est contrainte à un **timeout strict de 10 secondes** et le téléchargement du DOM est coupé à un **maximum de 10 Mo**.
+* **Rate Limiting Sans Base de Données :** Un système de fenêtre glissante (`lib/rateLimit.ts`) stocke temporairement les horodatages des requêtes par IP en mémoire RAM. Par défaut, il bloque les clients dépassant **10 requêtes par 10 minutes** pour éviter le déni de service.
+* **Cache TTL Local :** Pour économiser les crédits d'API et accélérer les requêtes redondantes, un cache local en mémoire (`lib/cache.ts`) conserve les analyses pour une durée de **5 minutes**.
 
 ---
 
-## 📄 License
+## 📊 Système de Scoring (Logique B2B SaaS Fit)
 
-MIT
+Le scoring évalue si l'entreprise détectée représente une cible commerciale pertinente pour un produit vendu à des entreprises SaaS B2B. La logique s'appuie sur un système de points transparent et déterministe (`lib/score.ts`) :
+
+> [!NOTE]
+> Le score de fit commence à une **base neutre de 5 / 10** et applique les règles suivantes :
+
+*   **Indicateurs SaaS Forts :**
+    *   **Page de tarifs / plans (+2) :** Présence d'un lien contenant `/pricing` ou `/plans` (indique un modèle de souscription récurrent).
+    *   **CTA de démo ou contact (+2) :** Liens de type `/demo`, `/book-demo` ou `/contact-sales` (indique une démarche Go-To-Market structurée).
+*   **Signaux d'Activité / Marketing :**
+    *   **Page Recrutement (+1) :** Liens `/careers` ou `/jobs` (croissance d'effectifs).
+    *   **Blog actif (+1) :** Liens `/blog` ou `/articles` (stratégie d'inbound marketing).
+    *   **Outils B2B Détectés (+1) :** Utilisation active d'outils analytiques/marketing d'entreprise (Segment, HubSpot ou Intercom).
+*   **Pénalités de Hors-Cible :**
+    *   **Détection E-commerce (-2) :** Utilisation de Shopify (indique une boutique en ligne B2C/B2B et non un éditeur de logiciel).
+    *   **CMS Traditionnel (-1) :** Utilisation de WordPress (indique souvent un site vitrine classique de PME locale).
+
+**Catégorisation finale :**
+*   `0 à 3` : **Low Fit** (Faible adéquation)
+*   `4 à 7` : **Medium Fit** (Adéquation moyenne)
+*   `8 à 10` : **High Fit** (Forte adéquation SaaS)
+
+---
+
+## ⚠️ Limites Actuelles & Améliorations Futures
+
+Dans le cadre d'un déploiement en production industrielle au sein de **Konsole**, plusieurs améliorations architecturales sont recommandées :
+
+1. **Persistance Distribuée (Redis) :**
+   * *Limite actuelle :* Les Maps de cache et de rate-limiting résident dans la mémoire vive de l'instance d'application. Sur une infrastructure serverless (Vercel) ou multi-instance (autoscaling), cet état est volatile et réinitialisé à chaque extinction d'instance.
+   * *Amélioration :* Remplacer le cache RAM par un magasin de données partagé comme **Redis (Upstash)** pour assurer la persistance globale et le partage d'état entre toutes les fonctions serverless.
+2. **Gestion des Applications Single-Page (SPA) :**
+   * *Limite actuelle :* Cheerio ne fait que parser le code HTML brut de la réponse serveur. Si le site cible est entièrement rendu côté client par du JavaScript lourd (React, Angular ou Vue sans SSR), le scraper n'obtiendra qu'un DOM vide.
+   * *Amélioration :* Mettre en place un système de repli automatique (fallback) vers un navigateur léger sans tête (comme **Playwright** ou **Puppeteer**) uniquement lorsque le HTML renvoyé par Cheerio ne contient aucun lien ou texte exploitable.
+3. **Scraping Multi-Pages (Deep Crawling) :**
+   * *Limite actuelle :* Nous n'analysons que la page d'accueil.
+   * *Amélioration :* Étendre le scraper pour explorer de manière asynchrone 2 ou 3 pages enfants clés (comme les pages `/about`, `/legal` ou `/pricing` si elles ne sont pas chargées dynamiquement) afin d'obtenir des données d'enrichissement bien plus précises.
+4. **Gestion des Captchas et Pare-feu (WAF) :**
+   * *Limite actuelle :* Certains hébergeurs bloquent les requêtes provenant d'adresses IP associées à des serveurs cloud (AWS, Vercel).
+   * *Amélioration :* Intégrer un service de proxy rotatif résidentiel ou un service d'évitement de pare-feu (ex: ScrapingBee, ZenRows).
+
+---
+
+## 🎥 Livrables & Vidéos Loom
+
+Le rendu du cas pratique comprend les éléments suivants :
+
+1. **Vidéo Loom de Démo & Architecture (5-8 min) :**
+   * Présentation visuelle de l'interface en direct avec analyse de domaines SaaS et non-SaaS.
+   * Explication de la structure du code et du fonctionnement asynchrone du pipeline.
+   * Pitch sur l'intégration fonctionnelle de ce module dans la suite Konsole de Youno.
+2. **Vidéo Loom Bonus - Side Project (3-5 min) :**
+   * Présentation d'un projet personnel/professionnel connexe, de la stack technique choisie et des retours d'expérience associés.
