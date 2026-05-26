@@ -39,6 +39,7 @@ export function AnalyzerClient() {
           );
         }
 
+        console.log("[Youno] Analysis Result:", data);
         setResult(data as AnalysisResult);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");

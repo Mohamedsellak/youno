@@ -80,7 +80,7 @@ async function callLLM(
       temperature: 0.3,
       max_tokens: 1024,
     }),
-    signal: AbortSignal.timeout(15000), // 15s timeout
+    signal: AbortSignal.timeout(8000), // 8s timeout
   });
 
   if (!response.ok) {
@@ -133,7 +133,11 @@ export async function enrichWithLLM(
 
   // Try primary model, then fallbacks if rate-limited
   const models = [
-    process.env.OPENROUTER_MODEL || "google/gemma-4-31b-it:free",
+    process.env.OPENROUTER_MODEL || "openai/gpt-oss-20b:free",
+    "liquid/lfm-2.5-1.2b-instruct:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "google/gemma-4-31b-it:free",
     "meta-llama/llama-3.3-70b-instruct:free",
     "deepseek/deepseek-v4-flash:free",
   ];
