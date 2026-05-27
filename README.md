@@ -8,8 +8,7 @@
 
 L'application est déployée et accessible publiquement :
 
-* **Lien de production :** [https://youno.netlify.app](https://youno.netlify.app) *(ou sur le service de déploiement configuré)*
-* **Code Source :** [https://github.com/Mohamedsellak/youno](https://github.com/Mohamedsellak/youno)
+* **Lien de production :** [https://youno.netlify.app](https://youno.netlify.app)
 
 ---
 
