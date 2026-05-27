@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  // Zod validation
   const validation = analyzeInputSchema.safeParse(body);
   if (!validation.success) {
     return Response.json(

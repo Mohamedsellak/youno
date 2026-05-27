@@ -8,7 +8,7 @@
 
 L'application est déployée et accessible publiquement :
 
-* **Lien de production :** [https://youno.vercel.app](https://youno.vercel.app) *(ou sur le service de déploiement configuré)*
+* **Lien de production :** [https://youno.netlify.app](https://youno.netlify.app) *(ou sur le service de déploiement configuré)*
 * **Code Source :** [https://github.com/Mohamedsellak/youno](https://github.com/Mohamedsellak/youno)
 
 ---
@@ -61,7 +61,7 @@ Notre architecture privilégie l'efficacité, la rapidité d'exécution et le mi
 
 | Outil / Framework | Rôle & Composant | Justification & Avantages |
 | :--- | :--- | :--- |
-| **Next.js 16 (App Router)** | Framework Global | Idéal pour déployer des routes d'API Serverless performantes, bénéficier du rendu côté serveur, et s'intégrer nativement sur Vercel. |
+| **Next.js 16 (App Router)** | Framework Global | Idéal pour déployer des routes d'API Serverless performantes, bénéficier du rendu côté serveur, et s'intégrer nativement sur Netlify. |
 | **Cheerio** | Scraper DOM HTML | Extraction ultra-rapide en mémoire sans la lourdeur d'un navigateur sans tête (Headless Browser comme Puppeteer ou Playwright). Consommation de RAM minime et latence réseau optimisée. |
 | **OpenRouter API** | Enrichissement LLM | Permet de requêter des modèles open-source performants et gratuits (Gemma, Llama, DeepSeek) avec une seule clé d'API unifiée. |
 | **Hunter.io API** | Recherche de Contacts | Standard de l'industrie pour extraire des adresses emails professionnelles qualifiées et des profils associés à partir d'un domaine. |

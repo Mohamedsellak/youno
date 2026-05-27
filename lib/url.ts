@@ -46,6 +46,7 @@ export function normalizeUrl(input: string): string {
   let raw = input.trim();
 
   // Strip trailing slashes for normalization
+  //example https://example.com/ = https://example.com
   raw = raw.replace(/\/+$/, "");
 
   // Add protocol if missing
@@ -89,6 +90,7 @@ export function extractDomain(url: string): string {
     const normalized = url.includes("://") ? url : `https://${url}`;
     return new URL(normalized).hostname.replace(/^www\./, "");
   } catch {
+
     return url.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0];
   }
 }

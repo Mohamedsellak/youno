@@ -44,15 +44,4 @@ yarn-error.log*
 next-env.d.ts
 
 # presentation, LaTeX & internal docs (not for the company repo)
-*.tex
-*.pdf
-*.log
-*.aux
-*.nav
-*.out
-*.toc
-*.snm
-*.vrb
-speaker_notes.md
-LIVE_SESSION_EXPLANATION.md
-loom_guide.md
+/docs
