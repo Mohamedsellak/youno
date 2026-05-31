@@ -19,14 +19,14 @@ function isPrivateIP(hostname: string): boolean {
   // IPv4 private ranges
   const ipv4Parts = clean.split(".").map(Number);
   if (ipv4Parts.length === 4 && ipv4Parts.every((p) => !isNaN(p))) {
-    // 10.0.0.0/8
+    // 10.0.0.0/8 
     if (ipv4Parts[0] === 10) return true;
     // 172.16.0.0/12
     if (ipv4Parts[0] === 172 && ipv4Parts[1] >= 16 && ipv4Parts[1] <= 31)
       return true;
     // 192.168.0.0/16
     if (ipv4Parts[0] === 192 && ipv4Parts[1] === 168) return true;
-    // 127.0.0.0/8
+    // 127.0.0.0/8 
     if (ipv4Parts[0] === 127) return true;
     // 169.254.0.0/16 (link-local)
     if (ipv4Parts[0] === 169 && ipv4Parts[1] === 254) return true;

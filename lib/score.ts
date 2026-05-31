@@ -8,6 +8,9 @@ export function scoreFit(result: AnalysisResult): FitScore {
   let score = 5; // Start at baseline
   const reasons: string[] = [];
 
+  // example single object
+  // ["Pricing Page", "Demo/Contact CTA", "Blog", "Careers Page", "Segment", "HubSpot", "Intercom"]
+
   const signalMap = new Map(
     result.gtmSignals.map((s) => [s.name, s.value])
   );

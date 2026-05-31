@@ -4,8 +4,11 @@
  */
 import type { AnalysisResult } from "./types";
 
-const TTL_MS = 5 * 60 * 1000; // 5 minutes
+const TTL_MS = (Number(process.env.TTL_CACHE_MINUTES) || 5) * 60 * 1000; // 5 minutes
 
+// pour stocker les url analyser avec leur resultat
+// pour eviter de reanalyser la meme url 
+// et pour eviter de perdre du temps 
 const cache = new Map<string, { data: AnalysisResult; expiresAt: number }>();
 
 export function getCached(key: string): AnalysisResult | null {

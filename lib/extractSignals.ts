@@ -177,6 +177,7 @@ export function extractSignals(
   });
 
   // --- Extract text snippet (first 1500 chars of visible text) ---
+  // 
   $("script, style, noscript, svg, iframe").remove();
   const bodyText = $("body").text().replace(/\s+/g, " ").trim();
   const textSnippet = bodyText.slice(0, 1500);

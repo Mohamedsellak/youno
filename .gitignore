@@ -45,3 +45,7 @@ next-env.d.ts
 
 # presentation, LaTeX & internal docs (not for the company repo)
 /docs
+
+# Large media and data files
+/public/youno.mp4
+/public/*.csv

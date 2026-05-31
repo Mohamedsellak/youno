@@ -9,7 +9,7 @@ import type {
   LLMEnrichmentResult,
 } from "./types";
 
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_API_URL = process.env.OPENROUTER_API_URL || "https://openrouter.ai/api/v1/chat/completions";
 
 /**
  * Build the prompt that we send to the LLM.

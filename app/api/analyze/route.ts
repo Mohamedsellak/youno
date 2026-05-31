@@ -125,6 +125,8 @@ export async function POST(request: NextRequest) {
 
   // Merge any LLM tech/signal additions (avoid duplicates)
   const finalTechStack = [...techStack];
+  //example
+  // ["react", "nextjs", "firebase", "google-analytics", "vercel"]
   const techNames = new Set(techStack.map((t) => t.name.toLowerCase()));
   for (const t of llmResult?.techStackAdditions || []) {
     if (t.name && !techNames.has(t.name.toLowerCase())) {
@@ -141,6 +143,7 @@ export async function POST(request: NextRequest) {
   }
 
   // --- Build final result ---
+
   const result: AnalysisResult = {
     input: { url: validation.data.url, normalizedUrl },
     company,

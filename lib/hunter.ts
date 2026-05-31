@@ -4,7 +4,7 @@
  */
 import type { ContactsInfo } from "./types";
 
-const HUNTER_API_BASE = "https://api.hunter.io/v2";
+const HUNTER_API_BASE = process.env.HUNTER_API_BASE || "https://api.hunter.io/v2";
 
 export async function hunterEnrich(
   domain: string
@@ -21,6 +21,7 @@ export async function hunterEnrich(
     url.searchParams.set("domain", domain);
     url.searchParams.set("api_key", apiKey);
     url.searchParams.set("limit", "5");
+
 
     const response = await fetch(url.toString(), {
       signal: AbortSignal.timeout(8000),
